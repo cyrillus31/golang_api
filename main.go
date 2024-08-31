@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 )
 
@@ -10,8 +9,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if err := store.createAccountTable(); err != nil {
+		log.Fatal(err)
+	}
 
-	fmt.Printf("%+v", *store)
-	// server := newApiServer(":8001")
-	// server.Run()
+	server := newApiServer(":8000", store)
+	server.Run()
 }
