@@ -11,13 +11,13 @@ import (
 
 type APIServer struct {
 	listenAddr string
-	store Storage
+	store      Storage
 }
 
 func newApiServer(listenAddr string, store Storage) *APIServer {
 	return &APIServer{
 		listenAddr: listenAddr,
-		store: store,
+		store:      store,
 	}
 }
 
@@ -56,7 +56,17 @@ func (s *APIServer) handleGetAccount(w http.ResponseWriter, r *http.Request) err
 }
 
 func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
-	return nil
+	createAccountReq := new(CreateAccoutRequest) // returns a pointer
+	// createAccountReq := CreateAccoutRequest{}
+	if err := json.NewDecoder(r.Body).Decode(createAccountReq); err != nil {
+		return err
+	}
+	account := NewAccount(createAccountReq.FirstName, createAccountReq.LastName)
+	if err := s.store.CreateAccount(account); err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, account)
 }
 
 func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) error {
@@ -67,6 +77,7 @@ func (s *APIServer) handleTransfer(w http.ResponseWriter, r *http.Request) error
 	return nil
 }
 
+// Wrties JSON to a specified output writer with a sttus code
 func WriteJSON(w http.ResponseWriter, status int, v any) error {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)

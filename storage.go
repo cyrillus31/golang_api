@@ -41,7 +41,7 @@ func NewPostgresStore() (*PostgresStore, error) {
 
 func (s *PostgresStore) createAccountTable() error {
 	query := `CREATE TABLE IF NOT EXISTS account(
-		id INTEGER PRIMARY KEY,
+		id SERIAL PRIMARY KEY,
 		first_name VARCHAR(256),
 		last_name VARCHAR(256),
 		number INTEGER,
@@ -53,8 +53,10 @@ func (s *PostgresStore) createAccountTable() error {
 	return err
 }
 
-func (s *PostgresStore) CreateAccount(*Account) error {
-	return nil
+func (s *PostgresStore) CreateAccount(acc *Account) error {
+	query := `INSERT INTO account (first_name, last_name, number, balance, created_at) VALUES($1, $2, $3, $4, $5)`
+	_, err := s.db.Query(query, acc.FirstName, acc.LastName, acc.Number, acc.Balance, acc.CreatedAt)
+	return err
 }
 
 func (s *PostgresStore) UpdateAccount(*Account) error {
